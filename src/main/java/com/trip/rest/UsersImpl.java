@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.EJB;
+import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.trip.common.StringUtils;
 import com.trip.dto.ResponseStatusTO;
 import com.trip.dto.UsersTO;
 import com.trip.model.Users;
@@ -36,6 +38,8 @@ public class UsersImpl implements UsersIf{
 	@EJB
 	private UsersEJBIf empEJbIf;
 
+	@javax.annotation.Resource
+	private SessionContext sctx;
 	
 	@Inject
 	private Validator validator;
@@ -66,7 +70,7 @@ public class UsersImpl implements UsersIf{
 		return lstEmpTo;
 	}
 
-	public UsersTO getUsersById(int id) {
+	public UsersTO getUsersById(Integer id) {
 		UsersTO employeeTO = null;
 		try{
 			logger.info("id is :"+id);
@@ -117,21 +121,37 @@ public class UsersImpl implements UsersIf{
 		}
 	}
 
-	public Response updateUsers(UsersTO empTo, int id) {
+	public Response updateUsers(UsersTO empTo, Integer id) {
 		try{
+			Map<String, String> responseObj = new HashMap<String, String>();
+			empTo.setId(id);
 			Users uu = empEJbIf.getUsersById(id);
 			Users emp = Common.transformToUsers(empTo);
 			emp.setId(id);
 			emp.setDocumentId(uu.getDocumentId());
+			emp.setUserName(uu.getUserName());
+			if(!StringUtils.isNullCombo(empTo.getUserPassword())){
+				Users useerr = empEJbIf.getUserByName(sctx.getCallerPrincipal().getName());
+				if(id.equals(useerr.getId())){
+					emp.setPassword(Common.hashPassword(empTo.getUserPassword()));
+				}else{
+					responseObj.put("ErrorPass", "You can only update your password.");
+					return Response.status(Response.Status.BAD_REQUEST)
+					.entity(responseObj).build();
+				}
+			}else{
+				emp.setPassword(uu.getPassword());
+			}
+			
 			ResponseStatusTO response = empEJbIf.updateUsers(emp);
-			Map<String, String> responseObj = new HashMap<String, String>();
+			
 			if(response.getStatus()){
 				responseObj.put("Success", "Users updated successfully");
 				responseObj.put("userId", id+"");
 				return Response.ok().entity(responseObj).build();
 			}else{
 				responseObj.put("Error", "Error while updating Users");
-				return Response.noContent().entity(responseObj).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseObj).build();
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -139,7 +159,7 @@ public class UsersImpl implements UsersIf{
 		}
 	}
 
-	public Response deleteUsers(int id) {
+	public Response deleteUsers(Integer id) {
 		try{
 
 			Users emp = empEJbIf.getUsersById(id);
@@ -150,14 +170,14 @@ public class UsersImpl implements UsersIf{
 				return Response.ok().entity(responseObj).build();
 			}else{
 				responseObj.put("Error", "Error while deleting Users");
-				return Response.noContent().entity(responseObj).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseObj).build();
 			}
 
 		}catch(Exception e){
 			e.printStackTrace();
 			Map<String, String> responseObj = new HashMap<String, String>();
 			responseObj.put("Error", "Error while deleting Users");
-			return Response.noContent().entity(responseObj).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(responseObj).build();
 		}
 	}
 

@@ -47,6 +47,47 @@ $("#linkExpense").click(function(){
 
 });
 
+$("#linkLogout").click(function(){
+	confirmLogout("Are you sure you want to logout? ");
+});
+
+function confirmLogout(msg) {
+	bootbox.confirm({
+		message: msg,
+		buttons: {
+			confirm: {
+				label: "OK",
+				className: "btn btn-primary margin-right-10"
+			},
+			cancel: {
+				label: "Cancel",
+				className: "btn-default pull-right"
+			}
+		},
+		callback: function(result) {
+			if(result){
+				logout();
+			}
+		}
+	});
+}
+
+function logout(){
+	
+	$.ajax({
+		type : "PUT",
+		url : 'rest/users/logout',
+		success : function(data) {
+  			var baseUrl = document.location.origin;
+  			baseUrl += "/trip";
+  			window.location.replace(baseUrl);
+    	}, error : function(error){ alert(error.Error); }
+	});
+	
+}
+
+
+
 toastr.options = {
       "closeButton": true,
       "debug": false,

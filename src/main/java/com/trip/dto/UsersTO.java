@@ -25,6 +25,7 @@ public class UsersTO {
 	private String phone;
 	
 	private String userName;
+	private String userPassword;
 	
 	private String totalAmt;
 	
@@ -125,6 +126,16 @@ public class UsersTO {
 
 	public void setDocId(String docId) {
 		this.docId = docId;
+	}
+	
+	
+
+	public String getUserPassword() {
+		return userPassword;
+	}
+
+	public void setUserPassword(String userPassword) {
+		this.userPassword = userPassword;
 	}
 
 	@Override

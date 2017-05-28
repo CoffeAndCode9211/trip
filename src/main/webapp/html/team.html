@@ -30,10 +30,13 @@ function saveUser(){
             lastName : $("#txtUsrLastName").val(),
             email : $("#txtUsrEmail").val(),
             phone : $("#txtUsrPhone").val(),
-            };
+            userName : $("#txtUsrName").val(),
+            userPassword : $("#txtUsrPassword").val(),
+        }
     if(selectedEmpId != ""){
         type = "PUT";
         url += "/"+selectedEmpId;
+        data.userName = "";
     }
     
     $.ajax({
@@ -53,7 +56,21 @@ function saveUser(){
                 }
                 resetUser();
              }
-        }, error : function(error){ alert(JSON.stringify(error.responseText));}
+        }, error : function(error){ 
+        	
+        	if(error.responseText != null){
+        		var err = $.parseJSON(error.responseText);
+        		if(err.Error != null){
+        			alert(err.Error);
+        		}else if(err.ErrorPass != null){
+        			alert(err.ErrorPass);
+        		}else{
+        			alert("Please enter First Name");
+        		}       		
+        	}
+        	
+        	
+        }
     });
     
 }
@@ -67,6 +84,7 @@ function setUser(UserId){
         $("#txtUsrLastName").val(data.lastName);
         $("#txtUsrEmail").val(data.email);
         $("#txtUsrPhone").val(data.phone);
+        $("#txtUsrName").val(data.userName);
         $("#btnSaveUser").html("Update");
         if(data.docId != null){
             $(".userimgcont").empty();
@@ -94,12 +112,15 @@ function deleteUser(){
 
 var tblEmpGrid;
 function searchUser(){
-
+    var height = $(window).height() - 220;
+    if(height < 300){
+        height = 300;
+    }
     tblEmpGrid = $("#tblEmpGrid").DataTable({
         "processing": false,
         "searching": true,
         "serverSide": false,
-        scrollY:   300,
+        scrollY:   height,
         scroller:       true,
         "paging": true,
         "orderCellsTop": true,
@@ -294,6 +315,13 @@ $('#btnRemovePhoto').click(function (event){
       });
     }
 
+
+    $("input#txtUsrFirstName").keyup(function(e){
+      var val = $(this).val();
+      val = val.replace(/[^\w]+/g, "");
+      $("input#txtUsrName").val(val.toLowerCase());
+    });
+
 </script>
 
 <div class="portlet box green">
@@ -336,7 +364,7 @@ $('#btnRemovePhoto').click(function (event){
     <div class="modal-body">
         
 
-        <form class="form-horizontal" id="frmUsrImage">
+        <form  id="frmUsrImage">
             <div class="form-body">
 
                  <div class="row">
@@ -380,7 +408,7 @@ $('#btnRemovePhoto').click(function (event){
 
                                 <div class="form-group">
                                     <label class="control-label">First Name *</label>
-                                    <input type="text" class="form-control" placeholder="Enter Code" id="txtUsrFirstName" name="txtUsrFirstName">
+                                    <input type="text" class="form-control" placeholder="Enter First Name" id="txtUsrFirstName" name="txtUsrFirstName">
                                     <span class="help-block">  </span>
                                 </div>
                        
@@ -389,7 +417,7 @@ $('#btnRemovePhoto').click(function (event){
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label">Last Name</label>
-                                    <input type="text" class="form-control" placeholder="Enter Description" id="txtUsrLastName" name="txtUsrLastName">
+                                    <input type="text" class="form-control" placeholder="Enter Last Name" id="txtUsrLastName" name="txtUsrLastName">
                                 </div>
                             </div>
                         </div>
@@ -397,7 +425,7 @@ $('#btnRemovePhoto').click(function (event){
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label">Email</label>
-                                       <input type="text" class="form-control" placeholder="Enter Code" id="txtUsrEmail" name="txtUsrEmail">
+                                       <input type="text" class="form-control" placeholder="Enter Email" id="txtUsrEmail" name="txtUsrEmail">
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -405,20 +433,32 @@ $('#btnRemovePhoto').click(function (event){
                                     <label class="control-label">Phone
                                         <span class="required" aria-required="true"> </span>
                                     </label>
-                                        <input type="text" class="form-control" placeholder="Enter Code" id="txtUsrPhone" name="txtUsrPhone">
+                                        <input type="text" class="form-control" placeholder="Enter Phone" id="txtUsrPhone" name="txtUsrPhone">
                                 </div>
                             </div>
 
                         </div>
 
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label">Username</label>
+                                       <input type="text" class="form-control" placeholder="Enter Username" id="txtUsrName" name="txtUsrName"  readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label">Password
+                                        <span class="required" aria-required="true"> </span>
+                                    </label>
+                                        <input type="password" class="form-control" placeholder="Enter Password" id="txtUsrPassword" name="txtUsrPassword">
+                                </div>
+                            </div>
 
+                        </div>
 
                      </div>
                 </div>
-
-          
-
-              
             </div>
 
             <div class="form-actions">

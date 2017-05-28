@@ -1,0 +1,151 @@
+<link rel="stylesheet" href="css/plan.css">
+ <link href='https://fonts.googleapis.com/css?family=Roboto:400,300' rel='stylesheet'>
+ <div class="planContainer" >
+   <div class="col-md-12">
+       <div class="col-md-8 col-md-offset-2 wow fadeInDown" align="center" data-wow-delay="0.3s">
+          <div class="col-md-12 card-header">
+             <input class="newtimerDateCont" id="txtPlanDate" data-date-format="dd-M-yyyy" data-date-start-date="+0d" size="11" autocomplete="off" placeholder="Select event Date" type="text" style="width : 20%;"  readonly />
+             <input type="text"  autocomplete="off" placeholder="Add Description"  id="txtPlanDescription"  >
+             <button type="button" style="margin-top: 10px;" onclick="savePlan()" id="btnAddPlan" class="btn btn-default" >Add</button>
+          </div>
+       </div>
+       <div class="col-md-8 col-md-offset-2">
+          <div class="col-md-12 card list-div" align="left" >
+
+            <table class="table table-hover"  >
+                  <thead class="planheader">
+                      <tr>
+                          <th width="20%"> Date </th>
+                          <th width="70%"> Description </th>
+                          <th width="5%" class="text-center"> Edit </th>
+                          <th width="5%" class="text-center"> Delete </th>
+                      </tr>
+                  </thead>
+                  <tbody id="planTbody">
+                      <tr>
+                          <td> 12-May-2017 </td>
+                          <td> Will Leave from Delhi to Leh by Flight </td>
+                          <td class="text-center"  planid="12" > <i class="fa fa-edit" aria-hidden="true"></i> </td>
+                          <td class="text-center"> <i class="fa fa-close" aria-hidden="true"></i> </td>
+                      </tr>
+                  </tbody>
+              </table>
+          </div>
+       </div>
+    </div>
+  </div>
+ <script type="text/javascript">
+
+var selectedPlanId = "";
+
+ jQuery().datepicker && $(".newtimerDateCont").datepicker({
+      orientation: "right",
+     autoclose: !0
+ });
+
+
+function buildEachRow(data){
+    var rowData = '<tr>';
+    rowData += '<td> '+data.planDate+' </td>';
+    rowData += '<td> '+data.planDescription+' </td>';
+    rowData += '<td class="text-center"  planid="'+data.planId+'" > <i class="fa fa-edit" aria-hidden="true"></i> </td>';
+    rowData += '<td class="text-center" delplanid="'+data.planId+'" > <i class="fa fa-close" aria-hidden="true"></i> </td>';
+    rowData += '</tr>';
+    return rowData;
+ }
+
+
+function getAllPlan(){
+    var url = "rest/plans";
+    $.get(url, function(data){
+
+        $("#planTbody").empty();
+        if(data != null && data.length > 0){
+            $.each(data, function( index, value ) {
+                $("#planTbody").append(buildEachRow(value));
+            });
+        }else{
+          $("#planTbody").append("<tr> <td align='center' colspan='4'><span class='fa fa-hand-peace-o'></span> You haven't planned any thing yet... </td></tr>");
+        }
+    });
+}
+
+
+ $("#planTbody").on("click", "td", function() {
+     if($( this ).attr("planid") != null){
+          setPlan($( this ).attr("planid"));
+     }else if($( this ).attr("delplanid") != null){
+          deletePlan($( this ).attr("delplanid"));
+     }
+ });
+
+ 
+
+
+function savePlan(){
+    var url = "rest/plans";
+    var type = "POST";
+    var data = {
+        planDate : $("#txtPlanDate").val(),
+        planDescription : $("#txtPlanDescription").val(),
+    }
+    if(selectedPlanId != ""){
+        type = "PUT";
+        url += "/"+selectedPlanId;
+    }
+    
+    $.ajax({
+        type : type,
+        url : url,
+        data : JSON.stringify(data),
+        contentType: "application/json",
+        success : function(data) {
+            if(selectedPlanId != ""){
+                toastr["success"]("Plan updated Successfully");
+            }else{
+                toastr["success"]("Plan added Successfully");
+            }
+            resetPlan();
+        }, error : function(error){ alert(JSON.stringify(error.responseText));
+
+        }
+    });
+    
+}
+
+
+function resetPlan(){
+    $("#txtPlanDate").val("");
+    $("#txtPlanDescription").val("");
+    $("#btnAddPlan").html("Add");
+    selectedPlanId = "";
+    getAllPlan();
+}
+
+
+function setPlan(planId){
+    var url = "rest/plans/"+planId;
+    $.get(url, function(data, status){
+        selectedPlanId = planId;
+        $("#btnAddPlan").html("Update");
+        $("#txtPlanDate").val(data.planDate);
+        $("#txtPlanDescription").val(data.planDescription);
+    });
+}
+
+function deletePlan(planId){
+    if(planId != ""){
+        $.ajax({
+            type : "DELETE",
+            url : 'rest/plans/'+planId,
+            success : function(data) {
+                 toastr["success"]("Plan deleted Successfully");
+                 resetPlan();
+            }, error : function(error){ alert(error.Error); }
+        });
+    }
+}
+
+getAllPlan();
+
+ </script>

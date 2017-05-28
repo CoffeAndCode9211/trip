@@ -32,7 +32,7 @@ public interface UsersIf {
 	@GET
 	@Path("/{id}")
 	@Produces({MediaType.APPLICATION_JSON})
-	public UsersTO getUsersById(@PathParam("id") int id);
+	public UsersTO getUsersById(@PathParam("id") Integer id);
 
 	@POST
 	@Path("/")
@@ -42,12 +42,12 @@ public interface UsersIf {
 	@PUT
 	@Path("/{id}")
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response updateUsers(UsersTO sm, @PathParam("id") int id);
+	public Response updateUsers(UsersTO sm, @PathParam("id") Integer id);
 
 	@DELETE
 	@Path("/{id}")
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response deleteUsers(@PathParam("id") int id);
+	public Response deleteUsers(@PathParam("id") Integer id);
 	
 	@PUT
 	@Path("/logout")

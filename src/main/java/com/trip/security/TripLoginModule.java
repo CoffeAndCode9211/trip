@@ -1,11 +1,8 @@
 
 package com.trip.security;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.security.Principal;
 import java.security.acl.Group;
-import java.util.Date;
 import java.util.Hashtable;
 
 import javax.naming.Context;
@@ -16,6 +13,7 @@ import javax.security.auth.login.LoginException;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.auth.spi.UsernamePasswordLoginModule;
 
+import com.trip.rest.Common;
 import com.trip.service.UsersEJBIf;
 
 
@@ -67,7 +65,7 @@ public class TripLoginModule extends UsernamePasswordLoginModule{
 			jndiProperties.put(Context.URL_PKG_PREFIXES, "org.jboss.ejb.client.naming");
 			final Context context = new InitialContext(jndiProperties);
 			UsersEJBIf lif = (UsersEJBIf) context.lookup("java:global/trip/UsersEJBImpl!com.trip.service.UsersEJBIf");
-			password=hashPassword(password);
+			password=Common.hashPassword(password);
 			result = lif.checkLogin(username, password);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -93,19 +91,6 @@ public class TripLoginModule extends UsernamePasswordLoginModule{
 		}
 
 	}
-	private String hashPassword(String password) {
-		String hashword = null;
-		try {
-			MessageDigest md5 = MessageDigest.getInstance("MD5");            
-			md5.update(password.getBytes());
-			BigInteger hash = new BigInteger(1, md5.digest());
-			hashword = hash.toString(16);
-		}catch (Exception e) {
-			e.printStackTrace();
-		}	        
-		return hashword;
-	}
-
-
+	
 
 }
