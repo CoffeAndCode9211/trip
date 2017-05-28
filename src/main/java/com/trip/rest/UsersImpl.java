@@ -119,9 +119,10 @@ public class UsersImpl implements UsersIf{
 
 	public Response updateUsers(UsersTO empTo, int id) {
 		try{
-
+			Users uu = empEJbIf.getUsersById(id);
 			Users emp = Common.transformToUsers(empTo);
 			emp.setId(id);
+			emp.setDocumentId(uu.getDocumentId());
 			ResponseStatusTO response = empEJbIf.updateUsers(emp);
 			Map<String, String> responseObj = new HashMap<String, String>();
 			if(response.getStatus()){

@@ -14,7 +14,10 @@ function resetUser(){
     $("#btnSaveUser").html("Save");
     $(".drugheader").text("Member Detail(s)");
     selectedEmpId = "";
-    $('#frmUsrImage').find("input[type=text], input[type=hidden], input[type=file]").val("");
+    $('#frmUsrImage input[type=hidden]').val("");
+    $('.fileinput').fileinput('clear');
+    $(".userimgcont").empty();
+    $(".userimgcont").html(' <img src="http://www.placehold.it/200x150/EFEFEF/AAAAAA&amp;text=no+image" alt="">');
     searchUser();
 }
 
@@ -39,18 +42,17 @@ function saveUser(){
         data : JSON.stringify(data),
         contentType: "application/json",
         success : function(data) {
-            if(selectedEmpId != ""){
-                toastr["success"]("Member updated Successfully");
-            }else{
-                toastr["success"]("Member added Successfully");
-            }
-            console.log($("#documentDataPat").val());
+            
              if($("#documentDataPat").val() != ""){
                 savePatImage(data.userId);
              }else{
+                if(selectedEmpId != ""){
+                    toastr["success"]("Member updated Successfully");
+                }else{
+                    toastr["success"]("Member added Successfully");
+                }
                 resetUser();
              }
-             searchUser();
         }, error : function(error){ alert(JSON.stringify(error.responseText));}
     });
     
@@ -68,9 +70,9 @@ function setUser(UserId){
         $("#btnSaveUser").html("Update");
         if(data.docId != null){
             $(".userimgcont").empty();
-            $(".userimgcont").html('<img alt="" class="img-circle"  src="rest/documents/open/'+data.docId+'">');
+            $(".userimgcont").html('<img alt=""  src="rest/documents/open/'+data.docId+'">');
         }else{
-            $(".userimgcont").html('<img alt="" class="img-circle" src="img/avatar.png">');
+            $(".userimgcont").html('<img alt="" src="img/avatar.png">');
         }
 
         $("#drugDetailContainer").modal("toggle");
@@ -85,7 +87,6 @@ function deleteUser(){
             success : function(data) {
                  toastr["success"]("Member deleted Successfully");
                  resetUser();
-                 searchUser();
             }, error : function(error){ alert(error.Error); }
         });
     }
@@ -235,13 +236,19 @@ function savePatImage(userId){
 }
     
 
-    function showResponse(responseText, statusText, xhr, $form)  { 
-        alert("Saved");
+function showResponse()  { 
+    if(selectedEmpId != ""){
+        toastr["success"]("Member updated Successfully");
+    }else{
+        toastr["success"]("Member added Successfully");
     }
-    
-    function showError(responseText, statusText, xhr, $form)  { 
-           alert("error");
-    }
+    resetUser();
+}
+
+function showError()  { 
+   toastr["error"]("Oops... Something went wrong.");
+   resetUser();
+}
 
 $('#btnRemovePhoto').click(function (event){
     deleteDialog('Do you want to Remove the Photo?');
@@ -318,44 +325,6 @@ $('#btnRemovePhoto').click(function (event){
         </table>
     </div>
 </div>
-
-<!--
-<fieldset>
-    <legend>Photograph</legend>
-        <form id="frmUsrImage">
-            <div style=" height : 240px; ">
-                <fieldset style=" height : 190px; ">
-                    <div id="image" style="height:190px">
-                        <img src="http://www.placehold.it/200x150/EFEFEF/AAAAAA&amp;text=no+image" alt=""></img>
-                    </div>
-                </fieldset>
-                <div  class="formRow" style="margin-bottom: 0px; padding-top : 5px;">
-                    <div style="float : left;"> 
-                        <input type="file"  name="documentData" id="documentDataPat" onchange="savePatImage()" accept="image/*" style="width:85px;">
-                    </div>
-                    <div style="float : right;"> 
-                    <input type="button" class="chccBtn" name="" id="btnRemovePhoto" value="Remove" style="width:80px !important;margin-right:3px;">
-                        
-                    </div>
-                    <div style="float : left;margin:4px;"> 
-                        
-                    </div>
-                </div>  
-            </div>
-            
-            <input type="hidden" id="docPatientId" name="patientId" />
-            <input type="hidden" id="docPatientHRN" name="patientHRN" />
-            <input type="hidden" id="status" name="status"  value="A" />
-            <input type="hidden" id="documentFacilityId" name="facilityId" />
-            <input type="hidden" id="documentFilenameTemp" name="documentFilename" />
-            <input type="hidden" id="documentTitleTemp" name="documentTitle" />
-            <input type="hidden" id="documentTypeTemp" name="documentType" />
-            <input type="hidden" id="docDescription" name="description" />
-            
-            
-        </form>
-</fieldset>
--->
 
 
 
