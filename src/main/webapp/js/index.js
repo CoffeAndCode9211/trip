@@ -86,7 +86,9 @@ function logout(){
 	
 }
 
-
+$(document).ready(function(){
+  $(".container").load("html/plan.html"); 
+});
 
 toastr.options = {
       "closeButton": true,

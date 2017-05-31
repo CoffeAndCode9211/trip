@@ -13,8 +13,11 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.ws.rs.core.Response;
 
+import com.trip.common.StringUtils;
+import com.trip.dto.ExpenseTO;
 import com.trip.dto.PlanTO;
 import com.trip.dto.UsersTO;
+import com.trip.model.Expense;
 import com.trip.model.Plan;
 import com.trip.model.Users;
 
@@ -40,14 +43,21 @@ public class Common {
 	}
 	
 
-	private static final String DATE_TIME_FORMAT="dd-MMM-yyyy";
+	private static final String DATE_FORMAT="dd-MMM-yyyy";
+	
+	private static final String DATE_TIME_FORMAT="dd-MMM-yyyy HH:mm";
 
 	public static Date convertStringToDate(String srcDate) throws ParseException{
-		DateFormat formatter = new SimpleDateFormat(DATE_TIME_FORMAT);
+		DateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
 		return formatter.parse(srcDate);
 	}
 
 	public static String convertDateToString(Date srcDate){
+		DateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
+		return formatter.format(srcDate);
+	}
+	
+	public static String convertDateTimeToString(Date srcDate){
 		DateFormat formatter = new SimpleDateFormat(DATE_TIME_FORMAT);
 		return formatter.format(srcDate);
 	}
@@ -101,6 +111,44 @@ public class Common {
 		}
 		
 		return planTO;
+	}
+	
+	
+	
+	public static Expense transformToExpense(ExpenseTO expenseTO) throws ParseException{
+		Expense expense = new Expense();
+		expense.setDescription(expenseTO.getDescription());
+		if(expenseTO.getExpenseId() != null){
+			expense.setId(expenseTO.getExpenseId());
+		}
+		expense.setStatus("A");
+		if(!StringUtils.isNullCombo(expenseTO.getAmount())){
+			expense.setAmount(Double.valueOf(expenseTO.getAmount()));
+		}
+		if(!StringUtils.isNullCombo(expenseTO.getExpenseType())){
+			expense.setType(expenseTO.getExpenseType());
+		}
+		return expense;
+	}
+
+	public static ExpenseTO transformToExpenseTO(Expense expense){
+		ExpenseTO expenseTO = new ExpenseTO();
+		if(expense.getCreatedDateTime() != null){
+			expenseTO.setCreatedDatetime(convertDateTimeToString(expense.getCreatedDateTime()));
+		}
+		expenseTO.setDescription(expense.getDescription());
+		expenseTO.setExpenseId(expense.getId());
+		expenseTO.setStatus(expense.getStatus());
+		if(expense.getUserId() != null){
+			Users user = expense.getUserId();
+			expenseTO.setUserId(user.getId().toString());
+			expenseTO.setUserName(user.getUserName());
+		}
+		if(expense.getAmount() != null){
+			expenseTO.setAmount(String.format("%.2f", expense.getAmount()));
+		}
+		expenseTO.setExpenseType(expense.getType());
+		return expenseTO;
 	}
 	
 

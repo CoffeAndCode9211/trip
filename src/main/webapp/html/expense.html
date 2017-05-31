@@ -1,0 +1,197 @@
+
+ <div class="planContainer" >
+   <div class="col-md-12">
+       <div class="col-md-8 col-md-offset-2 wow fadeInDown" align="center" data-wow-delay="0.3s">
+          <div class="col-md-12 card-header">
+             
+             <input type="text"  autocomplete="off" placeholder="Add Expense Description"  class="metfields2" id="txtExpenseDescription"  >
+             <input class="metfields1" id="txtExpenseAmt"  autocomplete="off" placeholder="Enter Amount" type="number"    />
+             <button type="button" style="margin-top: 10px;" onclick="saveExpense()" id="btnAddExpense" class="btn btn-default" >Add</button>
+             <button type="button" style="margin-top: 10px;" onclick="resetExpense()" id="btnResetExpense" class="btn btn-default" >Clear</button>
+          </div>
+       </div>
+       <div class="col-md-8 col-md-offset-2">
+          <div class="col-md-12 card list-div" align="left" >
+
+            <table class="table table-hover"  >
+                  <thead class="planheader">
+                      <tr>
+                          <th width="70%"> Description </th>
+                          <th width="20%"> Amount </th>
+                          <th width="5%" class="text-center"> Edit </th>
+                          <th width="5%" class="text-center"> Delete </th>
+                      </tr>
+                  </thead>
+                  <tbody id="expenseTbody">
+                      
+                  </tbody>
+              </table>
+          </div>
+       </div>
+
+       <div class="col-md-8 col-md-offset-2 wow fadeInDown" align="center" data-wow-delay="0.3s">
+          <div class="col-md-12 card-header">
+             <label  style="color:#c8d2d8;" >Total Amount </label>
+             <input type="text"  autocomplete="off" placeholder=""  class="metfields3" id="txtAmtTotal"  readonly>
+            <label  style="color:#c8d2d8;" >shared between  </label>
+              <select id="cmbNoOfPpl"   onchange="calEachHead()"> 
+                  <option value="1" >1</option>
+                  <option value="2" >2</option>
+                  <option value="3" >3</option>
+                  <option value="4" >4</option>
+                  <option value="5" selected="selected" >5</option>
+                  <option value="6" >6</option>
+                  <option value="7" >7</option>
+                  <option value="8" >8</option>
+                  <option value="9" >9</option>
+                  <option value="10" >10</option>
+                  <option value="11" >11</option>
+                  <option value="12" >12</option>
+                  <option value="13" >13</option>
+                  <option value="14" >14</option>
+                  <option value="15" >15</option>
+                  <option value="16" >16</option>
+                  <option value="17" >17</option>
+
+              </select>
+              <label  style="color:#c8d2d8;" >peoples amounts to  </label>
+              <input type="text"  autocomplete="off" placeholder=""  class="metfields3" id="txtAmtPerHead"  readonly>
+              <label  style="color:#c8d2d8;" > each  </label>
+
+          </div>
+       </div>
+
+
+    </div>
+  </div>
+ <script type="text/javascript">
+
+var selectedExpenseId = "";
+
+
+function buildEachRow(data){
+    var rowData = '<tr>';
+    rowData += '<td> '+data.description+' </td>';
+    rowData += '<td> '+data.amount+' </td>';
+    rowData += '<td class="text-center"  expenseId="'+data.expenseId+'" > <i class="fa fa-edit" aria-hidden="true"></i> </td>';
+    rowData += '<td class="text-center" delexpenseId="'+data.expenseId+'" > <i class="fa fa-close" aria-hidden="true"></i> </td>';
+    rowData += '</tr>';
+    return rowData;
+ }
+
+
+function getAllExpense(){
+    var url = "rest/expense";
+    $.get(url, function(data){
+        var totalAmt = 0.00;
+        $("#expenseTbody").empty();
+        if(data != null && data.length > 0){
+           
+            $.each(data, function( index, value ) {
+                totalAmt += parseFloat(value.amount);
+                $("#expenseTbody").append(buildEachRow(value));
+            });
+            
+        }else{
+          $("#expenseTbody").append("<tr> <td align='center' colspan='4'><span class='fa fa-hand-peace-o'></span> You haven't added any expense yet... </td></tr>");
+        }
+        $("#txtAmtTotal").val(totalAmt.toFixed(2));
+        calEachHead();
+
+
+    });
+}
+
+var calEachHead = function(){
+    var totalAmt = $("#txtAmtTotal").val();
+    var noOfPpl = $("#cmbNoOfPpl").val();
+    if(totalAmt == ""){
+        totalAmt = 0.00;
+        $("#txtAmtTotal").val("0.00")
+    }
+    var eachHeadCost = parseFloat(totalAmt) / parseInt(noOfPpl);
+    if(isNaN(eachHeadCost)){
+      eachHeadCost = 0.00;
+    }
+    $("#txtAmtPerHead").val(eachHeadCost.toFixed(2));
+
+}
+
+ $("#expenseTbody").on("click", "td", function() {
+     if($( this ).attr("expenseId") != null){
+          setExpense($( this ).attr("expenseId"));
+     }else if($( this ).attr("delexpenseId") != null){
+          deleteExpense($( this ).attr("delexpenseId"));
+     }
+ });
+
+ 
+
+
+function saveExpense(){
+    var url = "rest/expense";
+    var type = "POST";
+    var data = {
+        amount : $("#txtExpenseAmt").val(),
+        description : $("#txtExpenseDescription").val(),
+    }
+    if(selectedExpenseId != ""){
+        type = "PUT";
+        url += "/"+selectedExpenseId;
+    }
+    
+    $.ajax({
+        type : type,
+        url : url,
+        data : JSON.stringify(data),
+        contentType: "application/json",
+        success : function(data) {
+            if(selectedExpenseId != ""){
+                toastr["success"]("Expense updated Successfully");
+            }else{
+                toastr["success"]("Expense added Successfully");
+            }
+            resetExpense();
+        }, error : function(error){ alert(JSON.stringify(error.responseText));
+
+        }
+    });
+    
+}
+
+
+function resetExpense(){
+    $("#txtExpenseAmt").val("");
+    $("#txtExpenseDescription").val("");
+    $("#btnAddExpense").html("Add");
+    selectedExpenseId = "";
+    getAllExpense();
+}
+
+
+function setExpense(expenseId){
+    var url = "rest/expense/"+expenseId;
+    $.get(url, function(data, status){
+        selectedExpenseId = expenseId;
+        $("#btnAddExpense").html("Update");
+        $("#txtExpenseAmt").val(data.amount);
+        $("#txtExpenseDescription").val(data.description);
+    });
+}
+
+function deleteExpense(expenseId){
+    if(expenseId != ""){
+        $.ajax({
+            type : "DELETE",
+            url : 'rest/expense/'+expenseId,
+            success : function(data) {
+                 toastr["success"]("Expense deleted Successfully");
+                 resetExpense();
+            }, error : function(error){ alert(error.Error); }
+        });
+    }
+}
+
+getAllExpense();
+
+ </script>

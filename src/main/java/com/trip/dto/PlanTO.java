@@ -4,8 +4,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.ws.rs.FormParam;
 
-import org.hibernate.validator.constraints.Email;
-
 public class PlanTO {
 
 	@NotNull
@@ -13,7 +11,7 @@ public class PlanTO {
 	@FormParam("txtPlanDate")
 	private String planDate;
 	
-	@Size(min = 1, message = "Please select Date")
+	@Size(min = 1, message = "Please select Description")
 	@FormParam("planDescription")
 	private String planDescription;
 	
